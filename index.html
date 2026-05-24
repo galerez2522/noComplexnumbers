@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>מרוכבים בתנועה — Complex Motion</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+  <!-- ===== Welcome / Auth Modal ===== -->
+  <div id="welcome-modal" class="modal hidden">
+    <div class="modal-card">
+      <h2>ברוכים הבאים ל<span class="grad">מרוכבים בתנועה</span></h2>
+      <p class="lead">היכנסי או הירשמי כדי לסנכרן התקדמות ולקבל גישה לתרגול ולדשבורד.</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-mode="signin">כניסה</button>
+        <button class="auth-tab" data-mode="signup">הרשמה</button>
+      </div>
+
+      <div class="auth-fields">
+        <label data-only="signup">שם מלא
+          <input type="text" id="auth-name" placeholder="לדוגמה: דנה לוי" autocomplete="name" />
+        </label>
+        <label>אימייל
+          <input type="email" id="auth-email" placeholder="name@example.com" autocomplete="email" />
+        </label>
+        <label>סיסמה
+          <input type="password" id="auth-password" placeholder="לפחות 6 תווים" autocomplete="current-password" />
+        </label>
+      </div>
+
+      <div id="auth-error" class="auth-error hidden"></div>
+
+      <button class="primary big" id="welcome-go">כניסה</button>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">∮</span>
+      <div class="brand-text">
+        <h1>מרוכבים בתנועה</h1>
+        <p class="subtitle">פלטפורמה אינטראקטיבית להמחשת מספרים מרוכבים · 5 יח״ל</p>
+      </div>
+      <div class="user-chip" id="user-chip">
+        <span id="user-name">תלמיד</span>
+        <button id="user-logout" title="החלפת משתמש">⇄</button>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-tab="plane">המישור המרוכב</button>
+      <button class="tab" data-tab="mult">כפל וסיבוב</button>
+      <button class="tab" data-tab="roots">שורשים</button>
+      <button class="tab" data-tab="cis">מחזוריות · cis</button>
+      <button class="tab" data-tab="helix">תלת־ממד · ספירלה</button>
+      <button class="tab" data-tab="practice">תרגול חכם</button>
+      <button class="tab teacher-only" data-tab="teacher">אזור מורה</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============ MODULE 1: PLANE ============ -->
+    <section class="module active" id="module-plane">
+      <div class="panel">
+        <h2>1. המספר המרוכב כמיקום במישור</h2>
+        <p class="lead">גררי את הנקודה <b>z</b> במישור או הזיזי את הסליידרים. כל ארבע ההצגות מתעדכנות בו־זמנית.</p>
+
+        <div class="controls">
+          <label>חלק ממשי <code>a = <span id="plane-a-val">3</span></code>
+            <input type="range" id="plane-a" min="-5" max="5" step="0.05" value="3" />
+          </label>
+          <label>חלק מדומה <code>b = <span id="plane-b-val">2</span></code>
+            <input type="range" id="plane-b" min="-5" max="5" step="0.05" value="2" />
+          </label>
+        </div>
+
+        <div class="repr-grid">
+          <div class="repr"><span class="repr-label">אלגברי</span><div class="repr-val" id="repr-alg">z = 3 + 2i</div></div>
+          <div class="repr"><span class="repr-label">קוטבי</span><div class="repr-val" id="repr-polar">r = 3.61, θ = 33.7°</div></div>
+          <div class="repr"><span class="repr-label">טריגונומטרי</span><div class="repr-val" id="repr-trig">3.61(cos33.7° + isin33.7°)</div></div>
+          <div class="repr"><span class="repr-label">cis</span><div class="repr-val" id="repr-cis">3.61·cis(33.7°)</div></div>
+        </div>
+
+        <div class="hint">
+          טיפ: <code>r</code> הוא המרחק מהראשית. <code>θ</code> נמדדת מהציר החיובי של הממשיים נגד כיוון השעון.
+        </div>
+
+        <div class="mini-quiz">
+          <p><b>שאלת חקר:</b> איפה z כש־a=0 ו־b חיובי? נסי וראי איזו זווית מתקבלת.</p>
+        </div>
+      </div>
+      <canvas id="canvas-plane" class="canvas"></canvas>
+    </section>
+
+    <!-- ============ MODULE 2: MULTIPLICATION ============ -->
+    <section class="module" id="module-mult">
+      <div class="panel">
+        <h2>2. כפל ב־מספר מרוכב = סיבוב + מתיחה</h2>
+        <p class="lead">בחרי את <b>z</b> ואת המכפיל <b>w</b>. לחצי "הפעלי כפל" כדי לראות אנימציה של הסיבוב והמתיחה.</p>
+
+        <div class="two-col">
+          <div>
+            <h3>המספר z</h3>
+            <label>a = <span id="m-a-val">2</span>
+              <input type="range" id="m-a" min="-4" max="4" step="0.05" value="2" />
+            </label>
+            <label>b = <span id="m-b-val">1</span>
+              <input type="range" id="m-b" min="-4" max="4" step="0.05" value="1" />
+            </label>
+          </div>
+          <div>
+            <h3>המכפיל w</h3>
+            <label>|w| = <span id="m-r-val">1</span>
+              <input type="range" id="m-r" min="0.2" max="3" step="0.05" value="1" />
+            </label>
+            <label>θ (מעלות) = <span id="m-t-val">90</span>
+              <input type="range" id="m-t" min="-360" max="360" step="1" value="90" />
+            </label>
+            <div class="quick-buttons">
+              <button data-w="i">×i</button>
+              <button data-w="-1">×(−1)</button>
+              <button data-w="-i">×(−i)</button>
+              <button data-w="2">×2</button>
+              <button data-w="cis60">×cis(60°)</button>
+              <button data-w="cis45r2">×√2·cis(45°)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="primary-repr" id="m-repr-zw">z·w = −1 + 2i</div>
+
+        <div class="button-row">
+          <button class="primary" id="m-animate">▶ הפעילי כפל</button>
+          <button class="secondary" id="m-power">⟳ חזקות z..z⁶</button>
+        </div>
+
+        <details class="more">
+          <summary>פרטים: z, w והשינוי</summary>
+          <div class="repr-grid">
+            <div class="repr"><span class="repr-label">z</span><div class="repr-val" id="m-repr-z">2 + i</div></div>
+            <div class="repr"><span class="repr-label">w</span><div class="repr-val" id="m-repr-w">cis(90°) = i</div></div>
+            <div class="repr"><span class="repr-label">השינוי</span><div class="repr-val" id="m-repr-change">סיבוב 90°, גודל ×1</div></div>
+          </div>
+          <div class="hint">כפל ב־i הוא בדיוק סיבוב ב־90°. כפל בערך ממשי הוא מתיחה בלבד.</div>
+        </details>
+      </div>
+      <canvas id="canvas-mult" class="canvas"></canvas>
+    </section>
+
+    <!-- ============ MODULE 3: ROOTS ============ -->
+    <section class="module" id="module-roots">
+      <div class="panel">
+        <h2>3. שורשים מרוכבים — n פתרונות על מעגל</h2>
+        <p class="lead">פתרונות המשוואה z<sup>n</sup> = c מסודרים על מעגל ברדיוס <code>|c|<sup>1/n</sup></code>, מרווחים שווה בזווית <code>2π/n</code>.</p>
+
+        <div class="controls">
+          <label>n = <span id="r-n-val">5</span>
+            <input type="range" id="r-n" min="2" max="12" step="1" value="5" />
+          </label>
+          <label>|c| = <span id="r-mag-val">1</span>
+            <input type="range" id="r-mag" min="0.3" max="3" step="0.05" value="1" />
+          </label>
+          <label>arg(c) (מעלות) = <span id="r-arg-val">0</span>
+            <input type="range" id="r-arg" min="-180" max="180" step="1" value="0" />
+          </label>
+        </div>
+
+        <button class="primary" id="r-animate">▶ צפי בבנייה הדרגתית</button>
+
+        <details class="more">
+          <summary>רשימת כל השורשים</summary>
+          <div id="roots-list" class="roots-list"></div>
+        </details>
+
+        <details class="more">
+          <summary>שיטת הבנייה</summary>
+          <div class="hint">
+            השורש ה־<i>k</i> הוא <code>|c|<sup>1/n</sup>·cis((arg(c) + 2πk)/n)</code> עבור k=0,1,...,n−1.
+          </div>
+        </details>
+      </div>
+      <canvas id="canvas-roots" class="canvas"></canvas>
+    </section>
+
+    <!-- ============ MODULE 4: PERIODICITY / CIS ============ -->
+    <section class="module" id="module-cis">
+      <div class="panel">
+        <h2>4. מחזוריות — cis(θ) על מעגל היחידה</h2>
+        <p class="lead">הזיזי את θ. שימי לב: cis(θ) = cis(θ + 2πk). הנקודה חוזרת אל עצמה כל סיבוב מלא.</p>
+
+        <div class="controls">
+          <label>θ (יחידות π) = <span id="c-t-val">0.25</span>π
+            <input type="range" id="c-t" min="-4" max="4" step="0.01" value="0.25" />
+          </label>
+          <button class="primary" id="c-play">▶ הרצי אוטומטית</button>
+        </div>
+
+        <div class="primary-repr" id="c-repr-cis">cis(θ) = 0.71 + 0.71i</div>
+
+        <details class="more">
+          <summary>רכיבי cos / sin של הנקודה</summary>
+          <div class="repr-grid">
+            <div class="repr"><span class="repr-label">θ</span><div class="repr-val" id="c-repr-t">π/4 ≈ 45°</div></div>
+            <div class="repr"><span class="repr-label">cos θ</span><div class="repr-val" id="c-repr-cos">0.71</div></div>
+            <div class="repr"><span class="repr-label">sin θ</span><div class="repr-val" id="c-repr-sin">0.71</div></div>
+          </div>
+          <div class="hint">משמאל המעגל, מימין הגרפים של sin ו־cos לאורך θ — שני "צללים" של אותה התנועה.</div>
+        </details>
+      </div>
+      <div class="canvas-pair">
+        <canvas id="canvas-cis" class="canvas"></canvas>
+        <canvas id="canvas-trig" class="canvas"></canvas>
+      </div>
+    </section>
+
+    <!-- ============ MODULE 5: 3D HELIX ============ -->
+    <section class="module" id="module-helix">
+      <div class="panel">
+        <h2>5. תלת־ממד — מחזוריות כספירלה</h2>
+        <p class="lead">בתלת־ממד ציר Z מייצג את θ (הזמן). z(θ)=cis(θ) נראה כמעגל ב־2D, אבל כשמותחים את θ לציר נוסף — מתקבלת ספירלה. שני סיבובים מלאים בספירלה = אותה נקודה במעגל. זה <b>בדיוק</b> מה שמחזוריות.</p>
+
+        <div class="controls">
+          <label>תדר ω = <span id="h-w-val">1</span>
+            <input type="range" id="h-w" min="0.5" max="4" step="0.1" value="1" />
+          </label>
+          <button class="primary" id="h-play">⏸ עצרי סיבוב</button>
+        </div>
+
+        <details class="more">
+          <summary>אפשרויות מתקדמות</summary>
+          <div class="controls">
+            <label>טווח θ עד <span id="h-r-val">4</span>π
+              <input type="range" id="h-r" min="1" max="8" step="0.5" value="4" />
+            </label>
+            <label>סוג מסלול
+              <select id="h-mode">
+                <option value="circle">cis(ωθ) — ספירלה (helix)</option>
+                <option value="spiral">חזקות r^θ·cis(θ) — ספירלה לוגריתמית</option>
+                <option value="damped">דעיכה e^(−αθ)·cis(θ)</option>
+              </select>
+            </label>
+            <label class="checkbox-row">
+              <input type="checkbox" id="h-shadow" checked />
+              הצגת "צללים" sin / cos
+            </label>
+          </div>
+        </details>
+
+        <details class="more">
+          <summary>טיפים לניווט</summary>
+          <div class="hint">
+            גררי עם העכבר כדי לסובב. גלגלת = זום. הקו הצהוב הוא ההיטל על המישור — המעגל המוכר. הקו הוורוד הוא המסלול ה־3D.
+          </div>
+        </details>
+      </div>
+      <div id="helix-canvas-wrap" class="canvas helix-wrap"></div>
+    </section>
+
+    <!-- ============ MODULE 6: PRACTICE ============ -->
+    <section class="module" id="module-practice">
+      <div class="panel wide">
+        <div class="practice-header">
+          <h2>6. תרגול חכם עם אבחון טעויות</h2>
+          <div class="streak">
+            <span>🔥 רצף: <b id="streak-val">0</b></span>
+            <span>✓ נכונות: <b id="score-correct">0</b></span>
+            <span>נסיונות: <b id="score-total">0</b></span>
+            <button class="ghost" id="practice-reset">איפוס</button>
+          </div>
+        </div>
+
+        <div class="practice-filters">
+          <span>נושא:</span>
+          <button class="filter active" data-topic="all">הכל</button>
+          <button class="filter" data-topic="polar">המרה קוטבית</button>
+          <button class="filter" data-topic="mult">כפל</button>
+          <button class="filter" data-topic="roots">שורשים</button>
+          <button class="filter" data-topic="cis">cis ומחזוריות</button>
+          <span class="sep">·</span>
+          <span>רמה:</span>
+          <button class="filter active" data-level="all">הכל</button>
+          <button class="filter" data-level="1">בסיסי</button>
+          <button class="filter" data-level="2">בינוני</button>
+          <button class="filter" data-level="3">מתקדם</button>
+        </div>
+
+        <div class="question-card" id="q-card">
+          <div class="q-topic" id="q-topic">המרה קוטבית</div>
+          <div class="q-text" id="q-text">טוענת שאלה...</div>
+
+          <div class="q-input-wrap" id="q-input-wrap">
+            <input type="text" id="q-input" placeholder="התשובה שלך..." autocomplete="off" />
+            <button class="primary" id="q-submit">בדקי</button>
+          </div>
+
+          <div id="q-choices" class="q-choices hidden"></div>
+
+          <div id="q-feedback" class="q-feedback"></div>
+
+          <div class="q-actions">
+            <button class="secondary" id="q-hint">💡 רמז</button>
+            <button class="ghost" id="q-skip">דלגי →</button>
+            <button class="primary" id="q-next" disabled>שאלה הבאה ←</button>
+          </div>
+        </div>
+
+        <div class="mistake-log">
+          <h3>📊 ניתוח הטעויות שלך</h3>
+          <div id="mistake-categories">עוד לא נאספו נתונים. ענו על כמה שאלות והניתוח יופיע כאן.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MODULE 7: TEACHER ============ -->
+    <section class="module teacher-only" id="module-teacher">
+      <div class="panel wide">
+        <h2>אזור מורה · דוחות כיתתיים</h2>
+        <p class="lead">דשבורד למורה: צפייה בהתקדמות של כל התלמידים המחוברים. הנתונים מסונכרנים מ-Firestore.</p>
+        <div id="t-source" class="t-source-pill">מקור הנתונים: ☁️ Firestore</div>
+
+        <div class="teacher-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="t-students">0</div>
+            <div class="stat-lbl">תלמידים פעילים</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="t-answered">0</div>
+            <div class="stat-lbl">שאלות שנענו</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="t-accuracy">0%</div>
+            <div class="stat-lbl">דיוק כיתתי</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="t-topweak">—</div>
+            <div class="stat-lbl">קושי עיקרי</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:24px">🚨 טעויות נפוצות בכיתה</h3>
+        <div id="t-mistakes" class="t-mistakes"></div>
+
+        <h3 style="margin-top:24px">👥 תלמידים</h3>
+        <table class="t-table" id="t-table">
+          <thead><tr><th>שם</th><th>שאלות</th><th>דיוק</th><th>רצף מרבי</th><th>קושי עיקרי</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="t-actions">
+          <button class="secondary" id="t-export">⤓ ייצוא JSON</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="credit">
+      <span class="credit-by">
+        נבנה באהבה ע״י <span class="credit-name grad">גל ארז</span>
+        <span class="heart">♥</span>
+      </span>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script src="js/plane-canvas.js"></script>
+  <script src="js/module-plane.js"></script>
+  <script src="js/module-mult.js"></script>
+  <script src="js/module-roots.js"></script>
+  <script src="js/module-cis.js"></script>
+  <script src="js/module-helix.js"></script>
+  <script src="js/questions.js"></script>
+  <script src="js/module-practice.js"></script>
+  <script src="js/module-teacher.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
